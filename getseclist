@@ -1,0 +1,36 @@
+#!/bin/bash
+# AUTHOR    Ben Acord
+# LICENSE   GPLv3 
+usage() {
+    printf "%s\n" $0
+    printf "Display the linecounts for various word lists.\n"
+    printf "This helps determine which list to run against a given target (eg. DirB, Gobuster, DirBuster, wfuzz, etc.)\n"
+    printf "\nUSAGE\t$0 -k <keyword>\n"
+    printf "WHERE\tkeyword   - a word to check seclist titles\n"
+    printf "EXAMPLE\t$0 -k rockyou\n\n"
+    exit 1
+}
+listpaths="/usr/share/seclists/ /usr/share/wordlists/"
+
+while getopts ":k:" o; do
+    case "${o}" in
+    k) 
+        keyword=${OPTARG}
+        ;;
+    *) 
+        usage
+        ;;
+    esac
+done
+shift $((OPTIND-1))
+
+if [ -z "${keyword}" ] ; then
+    usage
+fi
+
+printf "[*]  %s\n" "getseclist"
+printf "[*]  Checking: $listpaths\n\n"
+printf "LineCount  Filepath\n"
+printf -- "---------  -----------------------------------------------\n"
+find -L ${listpaths} -type f -iname "*${keyword}*" -exec wc -l {} \; | sort -rn | xargs printf "%-10d %s\n"
+printf "\n"
